@@ -12,7 +12,7 @@ Rails.application.routes.draw do
           get 'list_period', to: 'household#list_period'
         end
 
-        resources :groups
+        resources :group
     end
   end
 end

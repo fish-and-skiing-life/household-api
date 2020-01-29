@@ -10,25 +10,22 @@ class User < ApplicationRecord
     find(user_id)
   end
 
-  def self.list_by_group(group_id)
-    where(groud_id: group_id)
+  def self.list_by_group(group_token)
+    where(group_token: groud_token)
   end
 
   def self.create_user(info)
-    info = info.permit(:sub, :group_id)  
+    info = info.permit(:sub, :group_token)  
     create!(info)
   end
 
-  def self.update_group(info)
-    info = info.permit(:group_id) 
+  def update_user(info)
+    info = info.permit(:name, :group_token, :sub) 
     self.update!(info)
   end
 
-  def self.update_name(info)
-    logger.debug('-check---------------------------')
-    info = info.permit(:id,:name)
-    logger.debug('-check---------------------------')
-    self.update!(info)
+  def update_group(group_token)
+    self.update!({group_token: group_token})
   end
 
   def self.delete_user(id)

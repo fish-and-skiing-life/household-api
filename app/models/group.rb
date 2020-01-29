@@ -3,8 +3,9 @@ class Group < ApplicationRecord
     find(id)
   end
 
-  def self.create_group(info)
-    info = info.permit(:name)  
+  def self.create_group(info, token)
+    info = info.permit(:name) 
+    info['group_token'] = token 
     create!(info)
   end
 

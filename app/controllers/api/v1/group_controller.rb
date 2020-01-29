@@ -1,8 +1,7 @@
-
+require 'securerandom'
 module Api
   module V1
-    class GroupIndexController < ApplicationController
-      protect_from_forgery 
+    class GroupController < ApplicationController
       include Secured
       before_action :set_group, only: %i[show update destroy]
 
@@ -15,7 +14,9 @@ module Api
       end
 
       def create
-        group = Group.create_group(params[:group])
+        token =  SecureRandom.hex(8)
+        group = Group.create_group(params[:group], token)
+        @user.update_group(token)
         render json: { status: :ok, message: 'loaded the review', data: group}
       end
 

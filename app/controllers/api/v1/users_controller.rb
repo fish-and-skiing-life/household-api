@@ -5,63 +5,43 @@ module Api
     class UsersController < ApplicationController
       include Secured
       include Auth0Manager
-      before_action :set_user, only: %i[show update destroy]
 
       def callback
         render json: { path: "/#{@user.id}" }, status: :ok
       end
 
-      def name_update
-        @user = User.find(params['user']['id'])
-        logger.debug('-check---------------------------')
-        @user.update_name(params['user'])
-        logger.debug('-check---------------------------')
-        render json: { path: "/#{@user.name}" }, status: :ok
-      end
-
-      def check
-        testlist = []
-        logger.debug('-check---------------------------')
-        user_hash = Hash.new([])
-        logger.debug('-check---------------------------')
-        logger.debug(@user.group_id)
-        user_hash['group'] = @user.group_id
-        logger.debug('-check---------------------------')
-        logger.debug(testlist.push(@user))
-        # u = user(@user.sub)
-        logger.debug('-check---------------------------')
-        # user_hash['name'] = u["name"]
-        logger.debug('-check---------------------------')
-        logger.debug(user_hash)
-        
+      def check        
         render json: { user: @user}, status: :ok
       end
 
+      def name_update
+        user = @user.update_user(params[:user])
+        logger.debug('-check---------------------------')
+        render json: { path: "/#{@user.id}" }, status: :ok
+      end
+
       def index
-        logger.debug(@user)
-        users = User.where(id: @user.id)
-        user_id_hash =users.inject({}){|hash, u| hash[u.sub] = u.id;hash;}
-        user_hash = users.inject({}){|hash, u| hash[u.sub] = u.role;hash;}
-        query = users.inject([]){|arr,u| arr << u.sub}.join(" OR ")
-        @params = {
-          q: query,
-          fields: 'id,email,user_id,name,logins_count,last_login,picture,created_at',
-          include_fields: true,
-          page: 0,
-          per_page: 50
-        }
-        @users = auth0_client.users @params
-        @users = @users.each{|u| u["id"] = user_id_hash[u["user_id"]] }
-        testlist = []
-        render status: :ok, json: @users
+        render status: :ok, json: @user
       end
 
       def show
-        render json: @user, status: :ok
+        user_hash = Hash.new([])
+        user_hash['name'] = @user.name
+        user_hash['created_at'] = @user.created_at
+        if @user.group_token != nil then
+          group = Group.find_by(group_token: @user.group_token)
+          user_hash['group_token'] = @user.group_token
+          user_hash['group_name'] = group.name
+          user_hash['group_created_at'] = group.created_at
+        else
+          user_hash['group_token'] = nil
+          user_hash['group_name'] =  nil
+          user_hash['group_name'] = nil
+        end
+        render json: user_hash, status: :ok
       end
 
       def create
-        logger.debug('-check---------------------------')
         @params = {
           email: params[:email],
           password: params[:password],
@@ -74,11 +54,8 @@ module Api
       end
 
       def update
-        if @user.update_group(params[:group_id])
-            render json: @user, status: :ok
-        else
-            render json: {"message": "admin user"}, status: :unprocessable_entity
-        end
+        user = @user.update_user(params[:user])
+        render json: {status: :ok, data: user}
       end
 
       def delete
@@ -89,10 +66,6 @@ module Api
       end
 
       private
-      def set_user
-        @user = User.find_by(sub: params[:sub])
-        render status: :no_content unless @user 
-      end
 
       # Setup the Auth0 API connection.
       def auth0_client

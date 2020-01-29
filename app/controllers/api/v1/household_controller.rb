@@ -32,8 +32,6 @@ module Api
       end
 
       def update
-        testlist = []
-        logger.debug(testlist.push(@household))
         household = @household.update_household(params[:household])
         render json: {status: :ok, data: household}
       end
