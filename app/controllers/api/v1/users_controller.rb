@@ -63,6 +63,19 @@ module Api
           render json: { error: 'not_found'}, status: :not_found
         end
         user = @user.update_group(params[:group_token])
+        begin
+          households = Household.find_by(user_id: @user.id)
+          households.each do |household|
+            household.update_group(params[:group_token])
+          end
+          expenses = Expense.find_by(user_id: @user.id)
+          expenses.each do |expense|
+            expense.update_group(params[:group_token])
+          end
+        rescue Exception => e
+          
+        end
+        
         render json: {status: :ok, data: user}
       end
 

@@ -6,7 +6,12 @@ module Api
       before_action :set_expense, only: %i[show update destroy]
 
       def index
-        render json: Household.list(@user.id)
+        if @user.group_token != nil
+          household = Household.list_by_group(@user.group_token)
+        else
+          household = Household.list(@user.id)
+        end
+        render json: household
       end
 
       def list_by_expense
@@ -18,7 +23,12 @@ module Api
         ended_at = params[:ended_at].split('/')
         started_at = Time.local(started_at[0], started_at[1], started_at[2])
         ended_at = Time.local(ended_at[0], ended_at[1], ended_at[2])
-        render json: Household.list_period(started_at, ended_at)
+        if @user.group_token != nil
+          @household = Household.list_period_by_group(started_at, ended_at, @user.group_token)
+        else
+          @household = Household.list_period_by_user(started_at, ended_at, @user.id)
+        end
+        render json: @household
       end
 
       def show
@@ -26,8 +36,7 @@ module Api
       end
 
       def create
-
-        household = Household.create_household(params[:household])
+        household = Household.create_household(params[:household],@user.group_token)
         render json: { status: :ok, message: 'loaded the review', data: household}
       end
 

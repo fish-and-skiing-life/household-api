@@ -17,11 +17,9 @@ module Secured
 
   private
   def authenticate_request!
-    logger.debug(auth_token)
     @auth_payload, @auth_header = auth_token
     @user = User.from_token_payload(@auth_payload)
     if @user.name.nil? && request.original_fullpath != '/api/v1/name_update'
-      logger.debug(request.original_fullpath)
       render json: { path: '/startup',user: @user }, status: :moved_permanently
     else
       true

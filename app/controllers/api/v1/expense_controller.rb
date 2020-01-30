@@ -6,7 +6,12 @@ module Api
       before_action :set_expense, only: %i[show update destroy]
 
       def index
-        render json: Expense.list(@user.id)
+        if @user.group_token != nil
+          expense = Expense.list_by_group(@user.group_token)
+        else
+          expense = Expense.list(@user.id)
+        end
+        render json: expense
       end
 
       def show
@@ -14,7 +19,7 @@ module Api
       end
 
       def create
-        expense = Expense.create_expense(params[:expense])
+        expense = Expense.create_expense(params[:expense], @user.group_token)
         render json: { status: :ok, message: 'loaded the review', data: expense}
       end
 
@@ -24,8 +29,6 @@ module Api
       end
 
       def destroy
-        testlist = []
-        logger.debug(testlist.push(@expense))
         Expense.delete_expense(@expense.id)
       end
 
