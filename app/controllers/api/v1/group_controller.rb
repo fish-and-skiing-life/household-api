@@ -26,13 +26,20 @@ module Api
       end
 
       def destroy
+        users = User.where(group_token: params[:id])
+        users.each do |u|
+          u.update_group(nil)
+        end
         Group.delete_group(@group.id)
       end
 
       private
       def set_group 
-        @group = Group.find(params[:id])
-        render status: :no_content unless @group
+        @group = Group.find_by(group_token: params[:id])
+        if @group == nil 
+          render json: { error: 'not_found'}, status: :not_found
+
+        end
       end
 
     end

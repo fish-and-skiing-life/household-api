@@ -10,6 +10,7 @@ Rails.application.routes.draw do
           resources :household
           resources :expense
           get 'list_period', to: 'household#list_period'
+          patch 'attend_group', to: 'users#attend_group'
         end
 
         resources :group

@@ -16,7 +16,6 @@ module Api
 
       def name_update
         user = @user.update_user(params[:user])
-        logger.debug('-check---------------------------')
         render json: { path: "/#{@user.id}" }, status: :ok
       end
 
@@ -55,6 +54,15 @@ module Api
 
       def update
         user = @user.update_user(params[:user])
+        render json: {status: :ok, data: user}
+      end
+
+      def attend_group
+        group = Group.find_by(group_token: params[:group_token])
+        if group == nil 
+          render json: { error: 'not_found'}, status: :not_found
+        end
+        user = @user.update_group(params[:group_token])
         render json: {status: :ok, data: user}
       end
 

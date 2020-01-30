@@ -9,7 +9,7 @@ class Group < ApplicationRecord
     create!(info)
   end
 
-  def self.update_group(info)
+  def update_group(info)
     info = info.permit(:name) 
     self.update!(info)
   end
